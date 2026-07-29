@@ -1,0 +1,88 @@
+import type { PromptCard } from "../PromptCard";
+
+export const SensesPractice: readonly PromptCard[] = [
+	{
+		id: "SENSES_001",
+		title: "Atencion en los sentidos",
+		message: "Lleva la atencion a los sonidos del entorno.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_002",
+		title: "Atencion en los sentidos",
+		message: "Observa volumen, tono y duracion de cada sonido.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_003",
+		title: "Atencion en los sentidos",
+		message: "Registra pausas entre sonidos.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_004",
+		title: "Atencion en los sentidos",
+		message: "Percibe temperatura y contacto en la piel.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_005",
+		title: "Atencion en los sentidos",
+		message: "Observa olores o sabores presentes.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_006",
+		title: "Atencion en los sentidos",
+		message: "Nota estimulos visuales sin fijarte en detalles.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_007",
+		title: "Atencion en los sentidos",
+		message: "Si aparece juicio, vuelve a la percepcion directa.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_008",
+		title: "Atencion en los sentidos",
+		message: "Observa que los estimulos cambian continuamente.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_009",
+		title: "Atencion en los sentidos",
+		message: "Mantiene la atencion en una sensacion a la vez.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_010",
+		title: "Atencion en los sentidos",
+		message: "Amplia luego la atencion al conjunto sensorial.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_011",
+		title: "Atencion en los sentidos",
+		message: "Registra respuestas emocionales frente a los estimulos.",
+		category: "senses",
+		therapistNote: "",
+	},
+	{
+		id: "SENSES_012",
+		title: "Atencion en los sentidos",
+		message: "Sostiene una observacion neutral del campo sensorial.",
+		category: "senses",
+		therapistNote: "",
+	},
+];

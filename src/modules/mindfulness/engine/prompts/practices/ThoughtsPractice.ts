@@ -1,0 +1,88 @@
+import type { PromptCard } from "../PromptCard";
+
+export const ThoughtsPractice: readonly PromptCard[] = [
+	{
+		id: "THOUGHTS_001",
+		title: "Observacion de pensamientos",
+		message: "Observa la aparicion de pensamientos en este momento.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_002",
+		title: "Observacion de pensamientos",
+		message: "Reconoce cada pensamiento como un evento mental.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_003",
+		title: "Observacion de pensamientos",
+		message: "Evita evaluar si el contenido es correcto o incorrecto.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_004",
+		title: "Observacion de pensamientos",
+		message: "Permite que el pensamiento permanezca el tiempo que dure.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_005",
+		title: "Observacion de pensamientos",
+		message: "Observa como un pensamiento es reemplazado por otro.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_006",
+		title: "Observacion de pensamientos",
+		message: "Si te involucras con una cadena mental, vuelve a observar.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_007",
+		title: "Observacion de pensamientos",
+		message: "Registra tono, velocidad o repeticion de los pensamientos.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_008",
+		title: "Observacion de pensamientos",
+		message: "Nota cualquier respuesta corporal asociada.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_009",
+		title: "Observacion de pensamientos",
+		message: "Permite espacios de silencio mental cuando aparezcan.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_010",
+		title: "Observacion de pensamientos",
+		message: "Observa el impulso de controlar o suprimir pensamientos.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_011",
+		title: "Observacion de pensamientos",
+		message: "Regresa al rol de observador cuando sea necesario.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+	{
+		id: "THOUGHTS_012",
+		title: "Observacion de pensamientos",
+		message: "Mantiene una actitud de curiosidad frente al contenido mental.",
+		category: "thoughts",
+		therapistNote: "",
+	},
+];

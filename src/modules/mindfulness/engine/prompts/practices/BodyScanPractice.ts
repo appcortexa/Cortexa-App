@@ -1,0 +1,88 @@
+import type { PromptCard } from "../PromptCard";
+
+export const BodyScanPractice: readonly PromptCard[] = [
+	{
+		id: "BODYSCAN_001",
+		title: "Escaneo corporal",
+		message: "Lleva la atencion al contacto de los pies con la superficie.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_002",
+		title: "Escaneo corporal",
+		message: "Observa temperatura y presion en los pies.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_003",
+		title: "Escaneo corporal",
+		message: "Desplaza la atencion hacia piernas y rodillas.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_004",
+		title: "Escaneo corporal",
+		message: "Registra zonas de tension o relajacion sin intervenir.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_005",
+		title: "Escaneo corporal",
+		message: "Observa la region de pelvis y abdomen.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_006",
+		title: "Escaneo corporal",
+		message: "Nota sensaciones en espalda baja y media.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_007",
+		title: "Escaneo corporal",
+		message: "Recorre hombros, brazos y manos de manera gradual.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_008",
+		title: "Escaneo corporal",
+		message: "Observa cuello, mandibula y rostro.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_009",
+		title: "Escaneo corporal",
+		message: "Si surgen juicios, vuelve al registro sensorial.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_010",
+		title: "Escaneo corporal",
+		message: "Percibe el cuerpo como un conjunto de sensaciones cambiantes.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_011",
+		title: "Escaneo corporal",
+		message: "Mantiene una observacion continua de la postura.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+	{
+		id: "BODYSCAN_012",
+		title: "Escaneo corporal",
+		message: "Cierra el recorrido sosteniendo atencion global del cuerpo.",
+		category: "bodyscan",
+		therapistNote: "",
+	},
+];

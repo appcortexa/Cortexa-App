@@ -1,0 +1,88 @@
+import type { PromptCard } from "../PromptCard";
+
+export const BreathingPractice: readonly PromptCard[] = [
+	{
+		id: "BREATH_001",
+		title: "Respiracion consciente",
+		message: "Dirige suavemente tu atencion a la respiracion.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_002",
+		title: "Respiracion consciente",
+		message: "Observa el aire entrando y saliendo.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_003",
+		title: "Respiracion consciente",
+		message: "Nota el ritmo actual sin modificarlo.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_004",
+		title: "Respiracion consciente",
+		message: "Registra las pausas naturales entre inhalacion y exhalacion.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_005",
+		title: "Respiracion consciente",
+		message: "Observa las sensaciones del aire en nariz y garganta.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_006",
+		title: "Respiracion consciente",
+		message: "Percibe el movimiento del pecho y del abdomen.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_007",
+		title: "Respiracion consciente",
+		message: "Si aparecen distracciones, vuelve a la respiracion.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_008",
+		title: "Respiracion consciente",
+		message: "Observa cualquier tension corporal asociada al ritmo respiratorio.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_009",
+		title: "Respiracion consciente",
+		message: "Permite que cada exhalacion termine por si sola.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_010",
+		title: "Respiracion consciente",
+		message: "Mantente con una respiracion a la vez.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_011",
+		title: "Respiracion consciente",
+		message: "Observa si cambia la amplitud de la respiracion.",
+		category: "breathing",
+		therapistNote: "",
+	},
+	{
+		id: "BREATH_012",
+		title: "Respiracion consciente",
+		message: "Sostiene la atencion con una actitud estable.",
+		category: "breathing",
+		therapistNote: "",
+	},
+];

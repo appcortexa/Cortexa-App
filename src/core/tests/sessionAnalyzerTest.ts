@@ -1,0 +1,216 @@
+import { generateSession, type GeneratedSession } from "../generator/sessionGenerator";
+import {
+  analyzeSession,
+  type SessionAnalysis,
+} from "../evaluation/sessionAnalyzer";
+
+type ScenarioName =
+  | "Escenario 1: GO=HIT, NO_GO=CORRECT_REJECTION"
+  | "Escenario 2: GO=MISS, NO_GO=FALSE_ALARM"
+  | "Escenario 3: Respuestas aleatorias";
+
+function cloneSession(session: GeneratedSession): GeneratedSession {
+  return {
+    ...session,
+    trials: session.trials.map((trial) => ({ ...trial })),
+  };
+}
+
+function mulberry32(seed: number): () => number {
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6d2b79f5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function applyScenario1(base: GeneratedSession): GeneratedSession {
+  const session = cloneSession(base);
+
+  for (const trial of session.trials) {
+    if (trial.type === "GO") {
+      trial.result = "HIT";
+      trial.response = true;
+      trial.correct = true;
+      trial.reactionTime = 350;
+    } else {
+      trial.result = "CORRECT_REJECTION";
+      trial.response = false;
+      trial.correct = true;
+      trial.reactionTime = null;
+    }
+  }
+
+  return session;
+}
+
+function applyScenario2(base: GeneratedSession): GeneratedSession {
+  const session = cloneSession(base);
+
+  for (const trial of session.trials) {
+    if (trial.type === "GO") {
+      trial.result = "MISS";
+      trial.response = false;
+      trial.correct = false;
+      trial.reactionTime = null;
+    } else {
+      trial.result = "FALSE_ALARM";
+      trial.response = true;
+      trial.correct = false;
+      trial.reactionTime = 450;
+    }
+  }
+
+  return session;
+}
+
+function applyScenario3(base: GeneratedSession): GeneratedSession {
+  const session = cloneSession(base);
+  const random = mulberry32(20260709);
+
+  for (const trial of session.trials) {
+    const responseGiven = random() > 0.35;
+
+    if (trial.type === "GO") {
+      if (responseGiven) {
+        trial.result = "HIT";
+        trial.response = true;
+        trial.correct = true;
+        trial.reactionTime = 200 + Math.round(random() * 500);
+      } else {
+        trial.result = "MISS";
+        trial.response = false;
+        trial.correct = false;
+        trial.reactionTime = null;
+      }
+    } else if (responseGiven) {
+      trial.result = "FALSE_ALARM";
+      trial.response = true;
+      trial.correct = false;
+      trial.reactionTime = 220 + Math.round(random() * 550);
+    } else {
+      trial.result = "CORRECT_REJECTION";
+      trial.response = false;
+      trial.correct = true;
+      trial.reactionTime = null;
+    }
+  }
+
+  return session;
+}
+
+function printAnalysis(name: ScenarioName, analysis: SessionAnalysis): void {
+  console.log(`\n===== ${name} =====`);
+  console.log(`totalTrials: ${analysis.totalTrials}`);
+  console.log(`totalGo: ${analysis.totalGo}`);
+  console.log(`totalNoGo: ${analysis.totalNoGo}`);
+  console.log(`hits: ${analysis.hits}`);
+  console.log(`misses: ${analysis.misses}`);
+  console.log(`falseAlarms: ${analysis.falseAlarms}`);
+  console.log(`correctRejections: ${analysis.correctRejections}`);
+  console.log(`hitRate: ${analysis.hitRate}`);
+  console.log(`missRate: ${analysis.missRate}`);
+  console.log(`falseAlarmRate: ${analysis.falseAlarmRate}`);
+  console.log(`correctRejectionRate: ${analysis.correctRejectionRate}`);
+  console.log(`accuracy: ${analysis.accuracy}`);
+  console.log(`meanReactionTime: ${analysis.meanReactionTime}`);
+  console.log(`medianReactionTime: ${analysis.medianReactionTime}`);
+  console.log(
+    `standardDeviationReactionTime: ${analysis.standardDeviationReactionTime}`,
+  );
+  console.log(`minReactionTime: ${analysis.minReactionTime}`);
+  console.log(`maxReactionTime: ${analysis.maxReactionTime}`);
+  console.log(`percentile25ReactionTime: ${analysis.percentile25ReactionTime}`);
+  console.log(`percentile75ReactionTime: ${analysis.percentile75ReactionTime}`);
+  console.log(`dPrime: ${analysis.dPrime}`);
+  console.log(`criterionC: ${analysis.criterionC}`);
+  console.log(
+    `coefficientOfVariationReactionTime: ${analysis.coefficientOfVariationReactionTime}`,
+  );
+  console.log(
+    `clinicalIndexes.inhibitoryControl: ${analysis.clinicalIndexes.inhibitoryControl}`,
+  );
+  console.log(
+    `clinicalIndexes.sustainedAttention: ${analysis.clinicalIndexes.sustainedAttention}`,
+  );
+  console.log(
+    `clinicalIndexes.processingSpeed: ${analysis.clinicalIndexes.processingSpeed}`,
+  );
+  console.log(
+    `clinicalIndexes.cognitiveConsistency: ${analysis.clinicalIndexes.cognitiveConsistency}`,
+  );
+  console.log(
+    `clinicalIndexes.reconectaGlobalIndex: ${analysis.clinicalIndexes.reconectaGlobalIndex}`,
+  );
+  console.log(
+    `interpretation.inhibitoryControl: ${analysis.interpretation.inhibitoryControl}`,
+  );
+  console.log(
+    `interpretation.sustainedAttention: ${analysis.interpretation.sustainedAttention}`,
+  );
+  console.log(
+    `interpretation.processingSpeed: ${analysis.interpretation.processingSpeed}`,
+  );
+  console.log(
+    `interpretation.cognitiveConsistency: ${analysis.interpretation.cognitiveConsistency}`,
+  );
+  console.log(
+    `interpretation.reconectaGlobalIndex: ${analysis.interpretation.reconectaGlobalIndex}`,
+  );
+}
+
+function assertConsistency(analysis: SessionAnalysis): void {
+  const trialsByType = analysis.totalGo + analysis.totalNoGo;
+  if (trialsByType !== analysis.totalTrials) {
+    throw new Error(
+      `Inconsistencia en tipos de ensayo: totalGo + totalNoGo = ${trialsByType}, totalTrials = ${analysis.totalTrials}`,
+    );
+  }
+
+  const trialsByResult =
+    analysis.hits +
+    analysis.misses +
+    analysis.falseAlarms +
+    analysis.correctRejections;
+
+  if (trialsByResult !== analysis.totalTrials) {
+    throw new Error(
+      `Inconsistencia en resultados: hits + misses + falseAlarms + correctRejections = ${trialsByResult}, totalTrials = ${analysis.totalTrials}`,
+    );
+  }
+}
+
+function run(): void {
+  const baseSession = generateSession("TEST-EXP-001", "alcohol", "easy");
+
+  const scenarios: Array<{
+    name: ScenarioName;
+    build: (base: GeneratedSession) => GeneratedSession;
+  }> = [
+    {
+      name: "Escenario 1: GO=HIT, NO_GO=CORRECT_REJECTION",
+      build: applyScenario1,
+    },
+    {
+      name: "Escenario 2: GO=MISS, NO_GO=FALSE_ALARM",
+      build: applyScenario2,
+    },
+    {
+      name: "Escenario 3: Respuestas aleatorias",
+      build: applyScenario3,
+    },
+  ];
+
+  for (const scenario of scenarios) {
+    const session = scenario.build(baseSession);
+    const analysis = analyzeSession(session);
+    assertConsistency(analysis);
+    printAnalysis(scenario.name, analysis);
+  }
+
+  console.log("\nValidacion completada: todos los conteos son consistentes.");
+}
+
+run();

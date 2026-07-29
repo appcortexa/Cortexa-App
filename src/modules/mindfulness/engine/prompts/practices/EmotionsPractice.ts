@@ -1,0 +1,88 @@
+import type { PromptCard } from "../PromptCard";
+
+export const EmotionsPractice: readonly PromptCard[] = [
+	{
+		id: "EMOTIONS_001",
+		title: "Observacion de emociones",
+		message: "Observa la emocion predominante en este instante.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_002",
+		title: "Observacion de emociones",
+		message: "Identifica su intensidad de forma aproximada.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_003",
+		title: "Observacion de emociones",
+		message: "Registra donde se expresa en el cuerpo.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_004",
+		title: "Observacion de emociones",
+		message: "Permite que la emocion este presente sin forzar cambios.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_005",
+		title: "Observacion de emociones",
+		message: "Observa variaciones en su intensidad.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_006",
+		title: "Observacion de emociones",
+		message: "Detecta pensamientos que aparecen junto a la emocion.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_007",
+		title: "Observacion de emociones",
+		message: "Si hay evitacion, vuelve a la observacion directa.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_008",
+		title: "Observacion de emociones",
+		message: "Mantiene respiracion natural mientras observas.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_009",
+		title: "Observacion de emociones",
+		message: "Registra la emocion como un proceso temporal.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_010",
+		title: "Observacion de emociones",
+		message: "Observa cualquier impulso conductual asociado.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_011",
+		title: "Observacion de emociones",
+		message: "Evita etiquetarte a partir de la emocion actual.",
+		category: "emotions",
+		therapistNote: "",
+	},
+	{
+		id: "EMOTIONS_012",
+		title: "Observacion de emociones",
+		message: "Sostiene una actitud abierta frente a la experiencia emocional.",
+		category: "emotions",
+		therapistNote: "",
+	},
+];

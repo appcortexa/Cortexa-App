@@ -1,0 +1,88 @@
+import type { PromptCard } from "../PromptCard";
+
+export const CravingPractice: readonly PromptCard[] = [
+	{
+		id: "CRAVING_001",
+		title: "Surf del craving",
+		message: "Observa el craving como una experiencia presente.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_002",
+		title: "Surf del craving",
+		message: "Registra su intensidad actual sin juzgarla.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_003",
+		title: "Surf del craving",
+		message: "Nota en que zonas corporales se manifiesta.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_004",
+		title: "Surf del craving",
+		message: "Observa si cambia de forma, ubicacion o ritmo.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_005",
+		title: "Surf del craving",
+		message: "Permite que la urgencia fluctue por si misma.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_006",
+		title: "Surf del craving",
+		message: "Si surge impulso de actuar, registralo antes de responder.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_007",
+		title: "Surf del craving",
+		message: "Vuelve a la respiracion para estabilizar la atencion.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_008",
+		title: "Surf del craving",
+		message: "Observa pensamientos asociados al deseo.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_009",
+		title: "Surf del craving",
+		message: "No luches contra la experiencia, solo observala.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_010",
+		title: "Surf del craving",
+		message: "Registra momentos de aumento y disminucion.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_011",
+		title: "Surf del craving",
+		message: "Observa el craving como un proceso temporal.",
+		category: "craving",
+		therapistNote: "",
+	},
+	{
+		id: "CRAVING_012",
+		title: "Surf del craving",
+		message: "Mantiene una postura de observacion estable.",
+		category: "craving",
+		therapistNote: "",
+	},
+];
