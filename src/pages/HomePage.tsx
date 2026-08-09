@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { LEVELS } from "../core/levels";
 
-const APP_VERSION = "1.0.0";
+import { APP_VERSION } from "../config/app";
 type AppMode = "evaluation" | "training";
 
 function HomePage() {

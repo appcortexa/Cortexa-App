@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 // @ts-expect-error provided by vite-plugin-pwa at build time
 import { registerSW } from 'virtual:pwa-register'
+import { AuthProvider } from './auth'
 import AppRouter from './router/AppRouter'
 
 registerSW()
@@ -25,7 +26,10 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+<StrictMode>
+  <AuthProvider>
     <AppRouter />
-  </StrictMode>,
+  </AuthProvider>
+</StrictMode>
+
 )

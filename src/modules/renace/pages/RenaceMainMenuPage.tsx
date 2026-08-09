@@ -2,7 +2,7 @@ import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 import RenaceModuleCard from "../components/RenaceModuleCard";
-import renaceLogo from "../../../assets/logos/renace.png";
+import renaceLogo from "../../../assets/logos/Renace.png";
 
 type RenaceModule = {
 	titulo: string;
@@ -42,6 +42,10 @@ const renaceModules: RenaceModule[] = [
 		titulo: "Mindfulness",
 		descripcion: "Acceso rápido a prácticas de atención plena para estabilización atencional y autocuidado.",
 	},
+	{
+		titulo: "Prevención de Recaídas",
+		descripcion: "Intervenciones para reconocer señales de riesgo y fortalecer recursos de prevención.",
+	},
 ];
 
 function RenaceMainMenuPage() {
@@ -49,6 +53,11 @@ function RenaceMainMenuPage() {
 	const behavioralActivationTitle = "Activación Conductual";
 	const cognitiveRestructuringTitle = "Reestructuración Cognitiva";
 	const antiRuminationTitle = "Antirrumiación";
+	const emotionRegulationTitle = "Regulación Emocional";
+	const positiveAttentionTitle = "Atención Positiva";
+	const selfCompassionTitle = "Autocompasión";
+	const mindfulnessTitle = "Mindfulness";
+	const relapsePreventionTitle = "Prevención de Recaídas";
 
 	const openComingSoon = (moduleTitle: string) => {
 		if (moduleTitle === behavioralActivationTitle) {
@@ -63,6 +72,31 @@ function RenaceMainMenuPage() {
 
 		if (moduleTitle === antiRuminationTitle) {
 			navigate("/renace/antirrumiacion/configuracion");
+			return;
+		}
+
+		if (moduleTitle === emotionRegulationTitle) {
+			navigate("/renace/regulacion-emocional/configuracion");
+			return;
+		}
+
+		if (moduleTitle === positiveAttentionTitle) {
+			navigate("/renace/atencion-positiva/configuracion");
+			return;
+		}
+
+		if (moduleTitle === selfCompassionTitle) {
+			navigate("/renace/autocompasion/configuracion");
+			return;
+		}
+
+		if (moduleTitle === mindfulnessTitle) {
+			navigate("/renace/mindfulness/configuracion");
+			return;
+		}
+
+		if (moduleTitle === relapsePreventionTitle) {
+			navigate("/renace/prevencion-recaidas/configuracion");
 			return;
 		}
 

@@ -9,8 +9,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
-const APP_VERSION = "1.0.0";
+import { APP_VERSION } from "../config/app";
 
 const upcomingModules: string[] = [];
 

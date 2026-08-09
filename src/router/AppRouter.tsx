@@ -1,8 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CueExposureSessionProvider } from "../contexts/CueExposureSessionContext";
+import { RouteGuard } from "../auth/guards/RouteGuard";
+import { LicenseGuard } from "../auth/guards/LicenseGuard";
+import LicenseRequiredPage from "../auth/pages/LicenseRequiredPage";
 
 import CortexaHomePage from "../pages/CortexaHomePage";
 import MainMenuPage from "../pages/MainMenuPage";
+import LoginPage from "../auth/pages/LoginPage";
 import HomePage from "../pages/HomePage";
 import InstructionsPage from "../pages/InstructionsPage";
 import CountdownPage from "../pages/CountdownPage";
@@ -40,37 +44,44 @@ function AppRouter() {
     <CueExposureSessionProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<CortexaHomePage />} />
-          <Route path="/reconecta" element={<MainMenuPage />} />
-          <Route path="/renace/*" element={<RenaceRouter />} />
-          <Route path="/go-no-go" element={<HomePage />} />
-          <Route path="/instructions" element={<InstructionsPage />} />
-          <Route path="/countdown" element={<CountdownPage />} />
-          <Route path="/test" element={<TestPage />} />
-          <Route path="/finish" element={<FinishPage />} />
-          <Route path="/results" element={<ResultsPage />} />
-          <Route path="/evaluation-results" element={<EvaluationResultsPage />} />
-          <Route path="/training-results" element={<TrainingResultsPage />} />
-          <Route path="/urge-surfing" element={<UrgeSurfingPage />} />
-          <Route path="/urge-surfing/initial-craving" element={<UrgeSurfingInitialCravingPage />} />
-          <Route path="/urge-surfing/session" element={<UrgeSurfingSessionPage />} />
-          <Route path="/urge-surfing/results" element={<UrgeSurfingResultsPage />} />
-          <Route path="/urge-surfing/summary" element={<UrgeSurfingSummaryPage />} />
-          <Route path="/cue-exposure" element={<CueExposureHome />} />
-          <Route path="/cue-exposure/results" element={<CueExposureResultsPage />} />
-          <Route path="/cue-exposure/session" element={<CueExposureSession />} />
-          <Route path="/cue-exposure/final-craving" element={<CueExposureFinalCraving />} />
-          <Route path="/cue-exposure/summary" element={<CueExposureSummary />} />
-          <Route path="/mindfulness" element={<MindfulnessConfigPage />} />
-          <Route path="/mindfulness/initial-assessment" element={<MindfulnessInitialAssessmentPage />} />
-          <Route path="/mindfulness/session" element={<MindfulnessSessionPage />} />
-          <Route path="/mindfulness/final-assessment" element={<MindfulnessFinalAssessmentPage />} />
-          <Route path="/mindfulness/results" element={<MindfulnessResultsPage />} />
-          <Route path="/mindfulness/summary" element={<MindfulnessSessionSummaryPage />} />
-          <Route path="/breathing" element={<BreathingConfigPage />} />
-          <Route path="/breathing/session" element={<BreathingSessionPage />} />
-          <Route path="/breathing/summary" element={<BreathingSummaryPage />} />
-          <Route path="/breathing/results" element={<BreathingResultsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/license-required" element={<LicenseRequiredPage />} />
+
+          <Route element={<RouteGuard />}>
+            <Route element={<LicenseGuard />}>
+              <Route path="/" element={<CortexaHomePage />} />
+              <Route path="/reconecta" element={<MainMenuPage />} />
+              <Route path="/renace/*" element={<RenaceRouter />} />
+              <Route path="/go-no-go" element={<HomePage />} />
+              <Route path="/instructions" element={<InstructionsPage />} />
+              <Route path="/countdown" element={<CountdownPage />} />
+              <Route path="/test" element={<TestPage />} />
+              <Route path="/finish" element={<FinishPage />} />
+              <Route path="/results" element={<ResultsPage />} />
+              <Route path="/evaluation-results" element={<EvaluationResultsPage />} />
+              <Route path="/training-results" element={<TrainingResultsPage />} />
+              <Route path="/urge-surfing" element={<UrgeSurfingPage />} />
+              <Route path="/urge-surfing/initial-craving" element={<UrgeSurfingInitialCravingPage />} />
+              <Route path="/urge-surfing/session" element={<UrgeSurfingSessionPage />} />
+              <Route path="/urge-surfing/results" element={<UrgeSurfingResultsPage />} />
+              <Route path="/urge-surfing/summary" element={<UrgeSurfingSummaryPage />} />
+              <Route path="/cue-exposure" element={<CueExposureHome />} />
+              <Route path="/cue-exposure/results" element={<CueExposureResultsPage />} />
+              <Route path="/cue-exposure/session" element={<CueExposureSession />} />
+              <Route path="/cue-exposure/final-craving" element={<CueExposureFinalCraving />} />
+              <Route path="/cue-exposure/summary" element={<CueExposureSummary />} />
+              <Route path="/mindfulness" element={<MindfulnessConfigPage />} />
+              <Route path="/mindfulness/initial-assessment" element={<MindfulnessInitialAssessmentPage />} />
+              <Route path="/mindfulness/session" element={<MindfulnessSessionPage />} />
+              <Route path="/mindfulness/final-assessment" element={<MindfulnessFinalAssessmentPage />} />
+              <Route path="/mindfulness/results" element={<MindfulnessResultsPage />} />
+              <Route path="/mindfulness/summary" element={<MindfulnessSessionSummaryPage />} />
+              <Route path="/breathing" element={<BreathingConfigPage />} />
+              <Route path="/breathing/session" element={<BreathingSessionPage />} />
+              <Route path="/breathing/summary" element={<BreathingSummaryPage />} />
+              <Route path="/breathing/results" element={<BreathingResultsPage />} />
+            </Route>
+          </Route>
         </Routes>
       </BrowserRouter>
     </CueExposureSessionProvider>

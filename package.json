@@ -2,9 +2,11 @@
   "name": "reconecta-gonogo",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@11.10.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "vitest",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -14,6 +16,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
+    "@supabase/supabase-js": "^2.112.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1"
@@ -28,9 +31,11 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
+    "jsdom": "^23.2.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.62.0",
     "vite": "^8.1.1",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^1.6.1"
   }
 }
