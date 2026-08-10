@@ -12,6 +12,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: false,
         skipWaiting: false,
+        globPatterns: ['**/*.{js,css,html}', 'assets/*.png', 'logo/logo-reconecta.png'],
       },
       injectRegister: false,
       includeAssets: ['imagenes/**/*.png'],
