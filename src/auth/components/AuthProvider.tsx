@@ -59,9 +59,36 @@ const isLicenseServiceUnavailable = (error: unknown): boolean => {
     && /network|failed to fetch|fetch failed|timeout|service unavailable|offline/i.test(candidate.message);
 };
 
+const offlineDiagnostic = (event: string, details: Record<string, boolean | string>): void => {
+  // Temporary diagnostics: values are intentionally limited to booleans and safe categories.
+  // eslint-disable-next-line no-console
+  console.info('[CORTEXA-OFFLINE-DIAG]', event, details);
+};
+
+const sanitizedErrorMessage = (error: unknown): string => {
+  const message = error instanceof Error ? error.message : '';
+  if (/network|failed to fetch|fetch failed|timeout|service unavailable|offline/i.test(message)) {
+    return 'NETWORK_UNAVAILABLE';
+  }
+
+  if (/permission|unauthoriz|forbidden/i.test(message)) {
+    return 'AUTHORIZATION_ERROR';
+  }
+
+  return 'GENERIC_ERROR';
+};
+
+const errorName = (error: unknown): string =>
+  error instanceof Error ? error.name : 'UnknownError';
+
 export const validateLocalOfflinePermit = async (userId: string): Promise<boolean> => {
   const currentDeviceId = await deviceManager.getDeviceId();
   const storedPermit = await licenseManager.loadSignedOfflinePermit();
+
+  offlineDiagnostic('STORAGE', {
+    deviceIdPresent: Boolean(currentDeviceId),
+    storedPermitPresent: Boolean(storedPermit),
+  });
 
   return storedPermit
     ? offlinePermitService.verifySignedOfflinePermit(
@@ -91,6 +118,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
 
       if (!nextUser) {
         setLicense(null);
+        offlineDiagnostic('AUTH_PROVIDER_FINAL', { reason: 'SESSION_MISSING' });
         setLicenseValid(false);
         setLicenseLoading(false);
         return;
@@ -106,7 +134,11 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
         }
 
         setLicense(nextLicense);
+        offlineDiagnostic('OFFLINE_FALLBACK', { offlineFallbackEntered: false });
         const onlineLicenseValid = isLicenseValid(nextLicense);
+        if (!onlineLicenseValid) {
+          offlineDiagnostic('AUTH_PROVIDER_FINAL', { reason: 'LICENSE_QUERY_RESPONDED_INVALID' });
+        }
         setLicenseValid(onlineLicenseValid);
         // Persist offline copy once per userId+licenseId while provider is mounted
         try {
@@ -145,18 +177,23 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
                   : false;
 
                 if (!storedValid) {
+                  offlineDiagnostic('AUTH_PROVIDER_FINAL', { reason: 'STORED_PERMIT_INVALID' });
                   setLicenseValid(false);
                 }
 
-                // eslint-disable-next-line no-console
-                console.error('[AuthProvider] offline permit request or validation failed:', err);
+                offlineDiagnostic('PERMIT_PERSISTENCE', {
+                  errorName: errorName(err),
+                  errorMessage: sanitizedErrorMessage(err),
+                });
               }
             }
           }
         } catch (err) {
-          // Do not change auth state on persistence errors. Log for diagnostics.
-          // eslint-disable-next-line no-console
-          console.error('[AuthProvider] licenseManager.saveOfflineLicense error:', err);
+          // Do not change auth state on persistence errors. Log only a safe category.
+          offlineDiagnostic('PERMIT_PERSISTENCE', {
+            errorName: errorName(err),
+            errorMessage: sanitizedErrorMessage(err),
+          });
         }
       } catch (error) {
         if (!isMounted) {
@@ -164,7 +201,16 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
         }
 
         setLicense(null);
-        if (!isLicenseServiceUnavailable(error)) {
+        const classifiedAsNetworkUnavailable = isLicenseServiceUnavailable(error);
+        offlineDiagnostic('LICENSE_QUERY', {
+          licenseQueryFailed: true,
+          errorName: errorName(error),
+          errorMessage: sanitizedErrorMessage(error),
+          classifiedAsNetworkUnavailable,
+        });
+        offlineDiagnostic('OFFLINE_FALLBACK', { offlineFallbackEntered: classifiedAsNetworkUnavailable });
+        if (!classifiedAsNetworkUnavailable) {
+          offlineDiagnostic('AUTH_PROVIDER_FINAL', { reason: 'LICENSE_QUERY_RESPONDED_INVALID' });
           setLicenseValid(false);
           return;
         }
@@ -173,10 +219,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
           const storedValid = await validateLocalOfflinePermit(nextUser.id);
 
           if (isMounted) {
+            offlineDiagnostic('AUTH_PROVIDER_FINAL', {
+              reason: storedValid ? 'OFFLINE_PERMIT_ACCEPTED' : 'NETWORK_ERROR_WITHOUT_VALID_PERMIT',
+            });
             setLicenseValid(storedValid);
           }
         } catch {
           if (isMounted) {
+            offlineDiagnostic('AUTH_PROVIDER_FINAL', { reason: 'NETWORK_ERROR_WITHOUT_VALID_PERMIT' });
             setLicenseValid(false);
           }
         }
@@ -189,13 +239,29 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
 
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await authService.getCurrentSession();
+        const { data: { session }, error } = await authService.getCurrentSession();
+
+        offlineDiagnostic('SESSION_RECOVERY', {
+          sessionPresent: Boolean(session),
+          userPresent: Boolean(session?.user),
+        });
+        if (error) {
+          offlineDiagnostic('SESSION_RECOVERY_ERROR', {
+            errorName: errorName(error),
+            errorMessage: sanitizedErrorMessage(error),
+          });
+        }
 
         if (!isMounted) {
           return;
         }
 
         await syncAuthState(session);
+      } catch (error) {
+        offlineDiagnostic('SESSION_RECOVERY_ERROR', {
+          errorName: errorName(error),
+          errorMessage: sanitizedErrorMessage(error),
+        });
       } finally {
         if (isMounted) {
           setLoading(false);
