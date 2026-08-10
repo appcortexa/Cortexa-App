@@ -11,12 +11,6 @@ const KNOWN_KEY_IDS = ['key-v1'];
 
 const OFFLINE_PERMIT_PUBLIC_KEY = import.meta.env.VITE_OFFLINE_PERMIT_PUBLIC_KEY as string | undefined;
 
-const offlineDiagnostic = (category: string): void => {
-  // Temporary diagnostics: never include permit, key, signature, ID, or payload values.
-  // eslint-disable-next-line no-console
-  console.info('[CORTEXA-OFFLINE-DIAG]', 'PERMIT_VERIFICATION', { category });
-};
-
 interface OfflinePermitResponseMetadata {
   algorithm: string;
   keyId: string;
@@ -137,19 +131,16 @@ export class OfflinePermitService {
     expectedLicenseId?: string,
   ): Promise<boolean> {
     if (!OFFLINE_PERMIT_PUBLIC_KEY) {
-      offlineDiagnostic('publicKeyMissing');
       return false;
     }
 
     try {
       const { payload, algorithm, keyId } = permit;
       if (algorithm !== SUPPORTED_ALGORITHM) {
-        offlineDiagnostic('algorithmMismatch');
         return false;
       }
 
       if (!KNOWN_KEY_IDS.includes(keyId)) {
-        offlineDiagnostic('keyIdMismatch');
         return false;
       }
 
@@ -157,7 +148,6 @@ export class OfflinePermitService {
       try {
         publicKey = await importPublicKey(OFFLINE_PERMIT_PUBLIC_KEY);
       } catch {
-        offlineDiagnostic('signatureImportError');
         return false;
       }
 
@@ -165,36 +155,28 @@ export class OfflinePermitService {
       try {
         result = await verifyPermit(permit, publicKey);
       } catch {
-        offlineDiagnostic('signatureImportError');
         return false;
       }
       if (!result.valid) {
-        offlineDiagnostic('signatureInvalid');
         return false;
       }
 
       if (!payload || typeof payload !== 'object') {
-        offlineDiagnostic('permitMalformed');
         return false;
       }
       if (payload.userId !== expectedUserId) {
-        offlineDiagnostic('userMismatch');
         return false;
       }
       if (payload.deviceId !== expectedDeviceId) {
-        offlineDiagnostic('deviceMismatch');
         return false;
       }
       if (payload.appVersion !== expectedAppVersion) {
-        offlineDiagnostic('appVersionMismatch');
         return false;
       }
       if (expectedLicenseId && payload.licenseId !== expectedLicenseId) {
-        offlineDiagnostic('licenseIdMismatch');
         return false;
       }
       if (String(payload.licenseStatus) !== 'ACTIVE') {
-        offlineDiagnostic('licenseStatusInvalid');
         return false;
       }
 
@@ -202,11 +184,9 @@ export class OfflinePermitService {
         ? new Date(payload.offlineExpiresAt).getTime()
         : Number.NaN;
       if (Number.isNaN(offlineExpiresAt)) {
-        offlineDiagnostic('offlineExpiresAtInvalid');
         return false;
       }
       if (offlineExpiresAt <= Date.now()) {
-        offlineDiagnostic('offlineExpired');
         return false;
       }
 
@@ -215,19 +195,15 @@ export class OfflinePermitService {
           ? new Date(payload.licenseExpiresAt).getTime()
           : Number.NaN;
         if (Number.isNaN(licenseExpiresAt)) {
-          offlineDiagnostic('licenseExpiresAtInvalid');
           return false;
         }
         if (licenseExpiresAt <= Date.now()) {
-          offlineDiagnostic('licenseExpired');
           return false;
         }
       }
 
-      offlineDiagnostic('verificationSuccess');
       return true;
     } catch {
-      offlineDiagnostic('permitMalformed');
       return false;
     }
   }
