@@ -40,7 +40,7 @@ function assertValidPermitPayload(
   expectedUserId: string,
   expectedDeviceId: string,
   expectedAppVersion: string,
-  expectedLicenseId: string,
+  expectedLicenseId?: string,
 ): void {
   if (payload.userId !== expectedUserId) {
     throw new Error('Permit payload userId mismatch');
@@ -54,8 +54,31 @@ function assertValidPermitPayload(
     throw new Error('Permit payload appVersion mismatch');
   }
 
-  if (payload.licenseId !== expectedLicenseId) {
+  if (expectedLicenseId && payload.licenseId !== expectedLicenseId) {
     throw new Error('Permit payload licenseId mismatch');
+  }
+}
+
+function isFutureDate(value: string | null | undefined): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const timestamp = new Date(value).getTime();
+  return !Number.isNaN(timestamp) && timestamp > Date.now();
+}
+
+function assertValidOfflinePermitPayload(payload: OfflinePermitPayload): void {
+  if (String(payload.licenseStatus) !== 'ACTIVE') {
+    throw new Error('Permit payload licenseStatus is not ACTIVE');
+  }
+
+  if (!isFutureDate(payload.offlineExpiresAt)) {
+    throw new Error('Permit payload offlineExpiresAt is invalid or expired');
+  }
+
+  if (payload.licenseExpiresAt !== null && !isFutureDate(payload.licenseExpiresAt)) {
+    throw new Error('Permit payload licenseExpiresAt is invalid or expired');
   }
 }
 
@@ -112,6 +135,7 @@ export class OfflinePermitService {
       payload,
       signature,
       algorithm: metadata.algorithm as SignedOfflinePermitAlgorithm,
+      keyId: metadata.keyId,
     };
 
     const { valid } = await verifyPermit(permit, publicKey);
@@ -127,23 +151,27 @@ export class OfflinePermitService {
     expectedUserId: string,
     expectedDeviceId: string,
     expectedAppVersion: string,
-    expectedLicenseId: string,
+    expectedLicenseId?: string,
   ): Promise<boolean> {
     if (!OFFLINE_PERMIT_PUBLIC_KEY) {
       return false;
     }
 
     try {
-      const { payload, algorithm } = permit;
-      if (algorithm !== SUPPORTED_ALGORITHM) {
+      const { payload, algorithm, keyId } = permit;
+      if (algorithm !== SUPPORTED_ALGORITHM || !KNOWN_KEY_IDS.includes(keyId)) {
+        return false;
+      }
+
+      const publicKey = await importPublicKey(OFFLINE_PERMIT_PUBLIC_KEY);
+      const result = await verifyPermit(permit, publicKey);
+      if (!result.valid) {
         return false;
       }
 
       assertValidPermitPayload(payload, expectedUserId, expectedDeviceId, expectedAppVersion, expectedLicenseId);
-
-      const publicKey = await importPublicKey(OFFLINE_PERMIT_PUBLIC_KEY);
-      const result = await verifyPermit(permit, publicKey);
-      return result.valid;
+      assertValidOfflinePermitPayload(payload);
+      return true;
     } catch {
       return false;
     }

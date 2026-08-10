@@ -23,6 +23,8 @@ export interface SignedOfflinePermit {
   readonly payload: OfflinePermitPayload;
   readonly signature: string; // Base64URL representation of the signature (placeholder)
   readonly algorithm: SignedOfflinePermitAlgorithm;
+  /** Key metadata is outside the signed payload and does not alter its canonical form. */
+  readonly keyId: string;
 }
 
 export type { OfflinePermitPayload as OfflinePermitPayloadType };

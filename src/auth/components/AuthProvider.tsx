@@ -41,6 +41,38 @@ const isLicenseValid = (license: License | null): boolean => {
   return !Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() > Date.now();
 };
 
+const isLicenseServiceUnavailable = (error: unknown): boolean => {
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  const candidate = error as { message?: unknown; status?: unknown };
+  if (typeof candidate.status === 'number' && candidate.status >= 500) {
+    return true;
+  }
+
+  return typeof candidate.message === 'string'
+    && /network|failed to fetch|fetch failed|timeout|service unavailable|offline/i.test(candidate.message);
+};
+
+export const validateLocalOfflinePermit = async (userId: string): Promise<boolean> => {
+  const currentDeviceId = await deviceManager.getDeviceId();
+  const storedPermit = await licenseManager.loadSignedOfflinePermit();
+
+  return storedPermit
+    ? offlinePermitService.verifySignedOfflinePermit(
+        storedPermit,
+        userId,
+        currentDeviceId,
+        APP_VERSION,
+      )
+    : false;
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,7 +106,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
         }
 
         setLicense(nextLicense);
-        setLicenseValid(isLicenseValid(nextLicense));
+        const onlineLicenseValid = isLicenseValid(nextLicense);
+        setLicenseValid(onlineLicenseValid);
         // Persist offline copy once per userId+licenseId while provider is mounted
         try {
           if (
@@ -125,13 +158,28 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
           // eslint-disable-next-line no-console
           console.error('[AuthProvider] licenseManager.saveOfflineLicense error:', err);
         }
-      } catch {
+      } catch (error) {
         if (!isMounted) {
           return;
         }
 
         setLicense(null);
-        setLicenseValid(false);
+        if (!isLicenseServiceUnavailable(error)) {
+          setLicenseValid(false);
+          return;
+        }
+
+        try {
+          const storedValid = await validateLocalOfflinePermit(nextUser.id);
+
+          if (isMounted) {
+            setLicenseValid(storedValid);
+          }
+        } catch {
+          if (isMounted) {
+            setLicenseValid(false);
+          }
+        }
       } finally {
         if (isMounted) {
           setLicenseLoading(false);
