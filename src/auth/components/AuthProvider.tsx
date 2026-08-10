@@ -42,21 +42,22 @@ const isLicenseValid = (license: License | null): boolean => {
 };
 
 const isLicenseServiceUnavailable = (error: unknown): boolean => {
-  if (error instanceof TypeError) {
-    return true;
-  }
-
   if (typeof error !== 'object' || error === null) {
     return false;
   }
 
-  const candidate = error as { message?: unknown; status?: unknown };
-  if (typeof candidate.status === 'number' && candidate.status >= 500) {
+  const candidate = error as { category?: unknown; status?: unknown };
+  if (candidate.category === 'LICENSE_TRANSPORT_UNAVAILABLE' || candidate.status === 0) {
     return true;
   }
 
-  return typeof candidate.message === 'string'
-    && /network|failed to fetch|fetch failed|timeout|service unavailable|offline/i.test(candidate.message);
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  const messageCandidate = error as { message?: unknown };
+  return typeof messageCandidate.message === 'string'
+    && /network|failed to fetch|fetch failed|timeout|service unavailable|offline/i.test(messageCandidate.message);
 };
 
 const offlineDiagnostic = (event: string, details: Record<string, boolean | string>): void => {

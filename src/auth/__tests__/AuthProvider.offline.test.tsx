@@ -81,6 +81,34 @@ describe('AuthProvider secure offline fallback', () => {
     expect(dependencies.verifySignedOfflinePermit).toHaveBeenCalledWith({}, 'user-1', 'device-1', '1.0.0');
   });
 
+  it('uses fallback for a Safari-style generic transport error with no response', async () => {
+    dependencies.getLicense.mockRejectedValue({
+      name: 'UnknownError',
+      category: 'LICENSE_TRANSPORT_UNAVAILABLE',
+    });
+    await renderProvider();
+
+    expect(container.textContent).toBe('true');
+    expect(dependencies.verifySignedOfflinePermit).toHaveBeenCalledWith({}, 'user-1', 'device-1', '1.0.0');
+  });
+
+  it('denies offline access when the network fails but the stored permit is invalid', async () => {
+    dependencies.getLicense.mockRejectedValue(new Error('network unavailable'));
+    dependencies.verifySignedOfflinePermit.mockResolvedValue(false);
+    await renderProvider();
+
+    expect(container.textContent).toBe('false');
+    expect(dependencies.verifySignedOfflinePermit).toHaveBeenCalled();
+  });
+
+  it('denies a successful Supabase response with no license without using fallback', async () => {
+    dependencies.getLicense.mockResolvedValue(null);
+    await renderProvider();
+
+    expect(container.textContent).toBe('false');
+    expect(dependencies.verifySignedOfflinePermit).not.toHaveBeenCalled();
+  });
+
   it.each(['SUSPENDED', 'EXPIRED'])('denies an online %s license without using fallback', async status => {
     dependencies.getLicense.mockResolvedValue({ id: 'license-1', status, expiresAt: '2026-12-01T00:00:00.000Z' });
     await renderProvider();

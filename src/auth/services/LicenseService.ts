@@ -22,15 +22,30 @@ export type License = {
   expiresAt: string | null;
 };
 
+export class LicenseTransportUnavailableError extends Error {
+  public readonly category = 'LICENSE_TRANSPORT_UNAVAILABLE';
+
+  constructor() {
+    super('License transport unavailable');
+    this.name = 'LicenseTransportUnavailableError';
+  }
+}
+
 export class LicenseService {
   async getLicense(userId: string): Promise<License | null> {
-    const { data, error } = await supabase
+    const { data, error, status } = await supabase
       .from('licenses')
       .select('id, license_status, license_plan, offline_days, max_devices, license_version, grace_period_days, expires_at')
       .eq('user_id', userId)
       .maybeSingle<SupabaseLicenseRow>();
 
     if (error) {
+      // PostgREST uses status 0 only when fetch produced no HTTP response.
+      // Preserve that structural distinction for the signed offline fallback.
+      if (status === 0) {
+        throw new LicenseTransportUnavailableError();
+      }
+
       throw error;
     }
 
