@@ -82,11 +82,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
   const [licenseValid, setLicenseValid] = useState(false);
   const savedOfflineRef = useRef<{ userId: string; licenseId: string } | null>(null);
   const offlinePermitFlightsRef = useRef(new Map<string, Promise<void>>());
+  const signOutVersionRef = useRef(0);
 
   useEffect(() => {
     let isMounted = true;
 
     const syncAuthState = async (session: Session | null) => {
+      const signOutVersion = signOutVersionRef.current;
+      const isCurrentAuthState = () => isMounted && signOutVersion === signOutVersionRef.current;
       const nextUser = mapSessionToUser(session);
 
       setUser(nextUser);
@@ -103,7 +106,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
       try {
         const nextLicense = await licenseService.getLicense(nextUser.id);
 
-        if (!isMounted) {
+        if (!isCurrentAuthState()) {
           return;
         }
 
@@ -137,13 +140,13 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
                   void (async () => {
                     try {
                       const permit = await offlinePermitService.requestSignedOfflinePermit(nextUser.id, nextLicense);
-                      if (!isMounted) {
+                      if (!isCurrentAuthState()) {
                         resolveFlight();
                         return;
                       }
 
                       await licenseManager.saveSignedOfflinePermit(permit);
-                      if (isMounted) {
+                      if (isCurrentAuthState()) {
                         savedOfflineRef.current = { userId: nextUser.id, licenseId: nextLicense.id };
                       }
                       resolveFlight();
@@ -158,7 +161,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
                 }
 
                 await flight;
-                if (!isMounted) {
+                if (!isCurrentAuthState()) {
                   return;
                 }
 
@@ -200,16 +203,16 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
         try {
           const storedValid = await validateLocalOfflinePermit(nextUser.id);
 
-          if (isMounted) {
+          if (isCurrentAuthState()) {
             setLicenseValid(storedValid);
           }
         } catch {
-          if (isMounted) {
+          if (isCurrentAuthState()) {
             setLicenseValid(false);
           }
         }
       } finally {
-        if (isMounted) {
+        if (isCurrentAuthState()) {
           setLicenseLoading(false);
         }
       }
@@ -252,6 +255,29 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
     };
   }, []);
 
+  const signOut = async (): Promise<void> => {
+    // Invalidate in-flight license/permit work before Supabase emits SIGNED_OUT.
+    signOutVersionRef.current += 1;
+
+    const { error } = await authService.signOut();
+    if (error) {
+      throw error;
+    }
+
+    // Offline authorization is session-bound. Device identity is deliberately retained.
+    await Promise.all([
+      licenseManager.clearSignedOfflinePermit(),
+      licenseManager.clearLicense(),
+    ]);
+
+    savedOfflineRef.current = null;
+    offlinePermitFlightsRef.current.clear();
+    setUser(null);
+    setLicense(null);
+    setLicenseValid(false);
+    setLicenseLoading(false);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -261,6 +287,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
         authenticated: user !== null,
         license,
         licenseValid,
+        signOut,
       }}
     >
       {children}

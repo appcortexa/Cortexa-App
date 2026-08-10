@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const dependencies = vi.hoisted(() => ({
   getCurrentSession: vi.fn(),
+  signOut: vi.fn(),
   onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
   getLicense: vi.fn(),
   requestSignedOfflinePermit: vi.fn(),
@@ -13,10 +14,13 @@ const dependencies = vi.hoisted(() => ({
   getDeviceId: vi.fn(),
   loadSignedOfflinePermit: vi.fn(),
   saveSignedOfflinePermit: vi.fn(),
+  clearSignedOfflinePermit: vi.fn(),
+  clearLicense: vi.fn(),
 }));
 
 vi.mock('../services/AuthService', () => ({ authService: {
   getCurrentSession: dependencies.getCurrentSession,
+  signOut: dependencies.signOut,
   onAuthStateChange: dependencies.onAuthStateChange,
 } }));
 vi.mock('../services/LicenseService', () => ({ licenseService: { getLicense: dependencies.getLicense } }));
@@ -28,6 +32,8 @@ vi.mock('../services/DeviceManager', () => ({ deviceManager: { getDeviceId: depe
 vi.mock('../services/LicenseManager', () => ({ licenseManager: {
   loadSignedOfflinePermit: dependencies.loadSignedOfflinePermit,
   saveSignedOfflinePermit: dependencies.saveSignedOfflinePermit,
+  clearSignedOfflinePermit: dependencies.clearSignedOfflinePermit,
+  clearLicense: dependencies.clearLicense,
 } }));
 
 describe('AuthProvider secure offline fallback', () => {
@@ -41,6 +47,7 @@ describe('AuthProvider secure offline fallback', () => {
     document.body.appendChild(container);
     root = createRoot(container);
     dependencies.getCurrentSession.mockResolvedValue({ data: { session: { user: { id: 'user-1', email: 'test@example.com' } } } });
+    dependencies.signOut.mockResolvedValue({ error: null });
     dependencies.getLicense.mockResolvedValue(null);
     dependencies.getDeviceId.mockResolvedValue('device-1');
     dependencies.loadSignedOfflinePermit.mockResolvedValue({});
@@ -204,5 +211,33 @@ describe('AuthProvider secure offline fallback', () => {
 
     expect(container.textContent).toBe('false');
     expect(dependencies.verifySignedOfflinePermit).not.toHaveBeenCalled();
+  });
+
+  it('signs out, clears session-bound offline authorization, and clears auth state', async () => {
+    let signOut: (() => Promise<void>) | undefined;
+    const { AuthProvider } = await import('../components/AuthProvider');
+    const { AuthContext } = await import('../context/AuthContext');
+
+    await act(async () => {
+      root.render(
+        <AuthProvider>
+          <AuthContext.Consumer>{value => {
+            signOut = value.signOut;
+            return <span>{`${value.authenticated}:${value.licenseValid}`}</span>;
+          }}</AuthContext.Consumer>
+        </AuthProvider>,
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      await signOut?.();
+    });
+
+    expect(dependencies.signOut).toHaveBeenCalledTimes(1);
+    expect(dependencies.clearSignedOfflinePermit).toHaveBeenCalledTimes(1);
+    expect(dependencies.clearLicense).toHaveBeenCalledTimes(1);
+    expect(container.textContent).toBe('false:false');
   });
 });

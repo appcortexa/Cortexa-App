@@ -9,6 +9,7 @@ export interface AuthContextValue {
   authenticated: boolean;
   license: License | null;
   licenseValid: boolean;
+  signOut: () => Promise<void>;
 }
 
 export const defaultAuthContextValue: AuthContextValue = {
@@ -18,6 +19,7 @@ export const defaultAuthContextValue: AuthContextValue = {
   authenticated: false,
   license: null,
   licenseValid: false,
+  signOut: async () => {},
 };
 
 export const AuthContext = createContext<AuthContextValue>(defaultAuthContextValue);

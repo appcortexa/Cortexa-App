@@ -4,14 +4,39 @@ import {
 	Card,
 	CardContent,
 	Container,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
 	Stack,
 	Typography,
 } from "@mui/material";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/hooks/useAuth";
 import cortexaLogo from "../assets/logos/cortexa.png";
 
 function CortexaHomePage() {
 	const navigate = useNavigate();
+	const { signOut } = useAuth();
+	const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+	const [isSigningOut, setIsSigningOut] = useState(false);
+	const [signOutError, setSignOutError] = useState<string | null>(null);
+
+	const handleSignOut = async () => {
+		setIsSigningOut(true);
+		setSignOutError(null);
+
+		try {
+			await signOut();
+			navigate("/login", { replace: true });
+		} catch {
+			setSignOutError("No fue posible cerrar sesión. Inténtalo de nuevo.");
+		} finally {
+			setIsSigningOut(false);
+		}
+	};
 
 	return (
 		<Box
@@ -83,8 +108,37 @@ function CortexaHomePage() {
 							</CardContent>
 						</Card>
 					</Stack>
+
+					<Button
+						variant="text"
+						color="inherit"
+						onClick={() => setConfirmingSignOut(true)}
+						sx={{ alignSelf: "center", color: "text.secondary", textTransform: "none" }}
+					>
+						Cerrar sesión
+					</Button>
 				</Stack>
 			</Container>
+
+			<Dialog open={confirmingSignOut} onClose={isSigningOut ? undefined : () => setConfirmingSignOut(false)}>
+				<DialogTitle>Cerrar sesión</DialogTitle>
+				<DialogContent>
+					<DialogContentText>
+						¿Quieres cerrar tu sesión en este dispositivo?
+					</DialogContentText>
+					{signOutError && (
+						<Typography color="error" variant="body2" sx={{ mt: 2 }}>
+							{signOutError}
+						</Typography>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button disabled={isSigningOut} onClick={() => setConfirmingSignOut(false)}>Cancelar</Button>
+					<Button disabled={isSigningOut} onClick={handleSignOut} variant="contained">
+						Cerrar sesión
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Box>
 	);
 }

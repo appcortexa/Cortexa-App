@@ -1,13 +1,27 @@
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Typography } from "@mui/material";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../services/AuthService";
+import { useAuth } from "../hooks/useAuth";
 
 function LicenseRequiredPage() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const handleSignOut = async () => {
-    await authService.signOut();
-    navigate("/login", { replace: true });
+    setIsSigningOut(true);
+    setSignOutError(null);
+
+    try {
+      await signOut();
+      navigate("/login", { replace: true });
+    } catch {
+      setSignOutError("No fue posible cerrar sesión. Inténtalo de nuevo.");
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -40,11 +54,22 @@ function LicenseRequiredPage() {
             Su licencia de CORTEXA no está activa o ha expirado.
             Contacte al administrador para renovar su licencia.
           </Typography>
-          <Button variant="contained" size="large" onClick={handleSignOut}>
+          <Button variant="contained" size="large" onClick={() => setConfirmingSignOut(true)}>
             Cerrar sesión
           </Button>
         </Paper>
       </Container>
+      <Dialog open={confirmingSignOut} onClose={isSigningOut ? undefined : () => setConfirmingSignOut(false)}>
+        <DialogTitle>Cerrar sesión</DialogTitle>
+        <DialogContent>
+          <DialogContentText>¿Quieres cerrar tu sesión en este dispositivo?</DialogContentText>
+          {signOutError && <Typography color="error" variant="body2" sx={{ mt: 2 }}>{signOutError}</Typography>}
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={isSigningOut} onClick={() => setConfirmingSignOut(false)}>Cancelar</Button>
+          <Button disabled={isSigningOut} onClick={handleSignOut} variant="contained">Cerrar sesión</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
