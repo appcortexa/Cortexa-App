@@ -16,10 +16,9 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['imagenes/**/*.png'],
       manifest: {
-        name: 'Reconecta',
-        short_name: 'Reconecta',
-        description:
-          'Aplicación clínica para evaluación y entrenamiento neuropsicológico mediante tareas Go/No-Go.',
+        name: 'Cortexa',
+        short_name: 'Cortexa',
+        description: 'Plataforma clínica de neuromodulación.',
         id: '/',
         lang: 'es-MX',
         start_url: '/',
