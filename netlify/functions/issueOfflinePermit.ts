@@ -51,6 +51,10 @@ type OfflinePermitPayload = {
   nonce: string;
 };
 
+type DeviceAuthorizationRow = {
+  authorization_status: string;
+};
+
 function jsonResponse(body: unknown, statusCode = 200): NetlifyResponse {
   return {
     statusCode,
@@ -142,6 +146,20 @@ function isExpired(expiresAt: string | null): boolean {
   return !Number.isNaN(expiresAtTime) && expiresAtTime <= Date.now();
 }
 
+function resolveDevicePlatform(userAgent: string | undefined): 'WINDOWS' | 'MACOS' | 'ANDROID' | 'IOS' | 'LINUX' {
+  const normalized = userAgent?.toUpperCase() ?? '';
+  if (normalized.includes('ANDROID')) return 'ANDROID';
+  if (normalized.includes('IPHONE') || normalized.includes('IPAD') || normalized.includes('IPOD')) return 'IOS';
+  if (normalized.includes('WINDOWS')) return 'WINDOWS';
+  if (normalized.includes('MAC OS') || normalized.includes('MACINTOSH')) return 'MACOS';
+  return 'LINUX';
+}
+
+function resolveDeviceName(userAgent: string | undefined, platform: string): string {
+  const normalized = userAgent?.trim().replace(/\s+/g, ' ');
+  return normalized ? normalized.slice(0, 255) : `CORTEXA ${platform}`;
+}
+
 export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
   try {
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -179,9 +197,28 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
     if (license.license_status !== 'ACTIVE') return jsonResponse({ error: 'License not active' }, 403);
     if (isExpired(license.expires_at)) return jsonResponse({ error: 'License expired' }, 403);
 
-    // Real maxDevices enforcement remains pending; preserve the existing no-conflict behavior.
-    const hasDeviceConflict = false;
-    if (hasDeviceConflict) return jsonResponse({ error: 'Device conflict' }, 409);
+    const deviceId = parsedBody.deviceId.trim();
+    const userAgent = event.headers['user-agent'] ?? event.headers['User-Agent'];
+    const devicePlatform = resolveDevicePlatform(userAgent);
+    const deviceName = resolveDeviceName(userAgent, devicePlatform);
+    const { data: authorization, error: authorizationError } = await userClient.rpc('authorize_license_device', {
+      p_license_id: license.id,
+      p_device_id: deviceId,
+      p_device_name: deviceName,
+      p_device_platform: devicePlatform,
+    });
+    if (authorizationError) throw authorizationError;
+
+    const authorizationStatus = (authorization as DeviceAuthorizationRow[] | null)?.[0]?.authorization_status;
+    if (authorizationStatus === 'DEVICE_LIMIT_REACHED') {
+      return jsonResponse({ error: 'Device limit reached' }, 409);
+    }
+    if (authorizationStatus === 'LICENSE_NOT_FOUND') return jsonResponse({ error: 'License not found' }, 403);
+    if (authorizationStatus === 'LICENSE_NOT_ACTIVE') return jsonResponse({ error: 'License not active' }, 403);
+    if (authorizationStatus === 'LICENSE_EXPIRED') return jsonResponse({ error: 'License expired' }, 403);
+    if (authorizationStatus !== 'AUTHORIZED_EXISTING' && authorizationStatus !== 'AUTHORIZED_NEW') {
+      throw new Error(`Unexpected device authorization result: ${authorizationStatus ?? 'missing'}`);
+    }
 
     const issuedAt = new Date();
     const offlineDays = license.offline_days ?? 0;
@@ -191,7 +228,7 @@ export async function handler(event: NetlifyEvent): Promise<NetlifyResponse> {
       licenseId: license.id,
       licensePlan: license.license_plan,
       licenseStatus: license.license_status,
-      deviceId: parsedBody.deviceId.trim(),
+      deviceId,
       issuedAt: issuedAt.toISOString(),
       offlineExpiresAt: buildOfflineExpiresAt(issuedAt, offlineDays),
       licenseExpiresAt: license.expires_at,
