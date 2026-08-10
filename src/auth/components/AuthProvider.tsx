@@ -108,6 +108,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
   const [license, setLicense] = useState<License | null>(null);
   const [licenseValid, setLicenseValid] = useState(false);
   const savedOfflineRef = useRef<{ userId: string; licenseId: string } | null>(null);
+  const offlinePermitFlightsRef = useRef(new Map<string, Promise<void>>());
 
   useEffect(() => {
     let isMounted = true;
@@ -152,17 +153,47 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactElement => {
             const prev = savedOfflineRef.current;
             if (!(prev && prev.userId === nextUser.id && prev.licenseId === nextLicense.id)) {
               try {
-                const permit = await offlinePermitService.requestSignedOfflinePermit(nextUser.id, nextLicense);
+                const flightKey = `${nextUser.id}\u0000${nextLicense.id}`;
+                let flight = offlinePermitFlightsRef.current.get(flightKey);
+
+                if (!flight) {
+                  let resolveFlight!: () => void;
+                  let rejectFlight!: (reason: unknown) => void;
+                  flight = new Promise<void>((resolve, reject) => {
+                    resolveFlight = resolve;
+                    rejectFlight = reject;
+                  });
+                  // Store the flight before starting the request so concurrent syncs share it.
+                  offlinePermitFlightsRef.current.set(flightKey, flight);
+
+                  void (async () => {
+                    try {
+                      const permit = await offlinePermitService.requestSignedOfflinePermit(nextUser.id, nextLicense);
+                      if (!isMounted) {
+                        resolveFlight();
+                        return;
+                      }
+
+                      await licenseManager.saveSignedOfflinePermit(permit);
+                      if (isMounted) {
+                        savedOfflineRef.current = { userId: nextUser.id, licenseId: nextLicense.id };
+                      }
+                      resolveFlight();
+                    } catch (error) {
+                      rejectFlight(error);
+                    } finally {
+                      if (offlinePermitFlightsRef.current.get(flightKey) === flight) {
+                        offlinePermitFlightsRef.current.delete(flightKey);
+                      }
+                    }
+                  })();
+                }
+
+                await flight;
                 if (!isMounted) {
                   return;
                 }
 
-                await licenseManager.saveSignedOfflinePermit(permit);
-                if (!isMounted) {
-                  return;
-                }
-
-                savedOfflineRef.current = { userId: nextUser.id, licenseId: nextLicense.id };
                 setLicenseValid(true);
               } catch (err) {
                 const currentDeviceId = await deviceManager.getDeviceId();
