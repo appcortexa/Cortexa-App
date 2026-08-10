@@ -78,6 +78,9 @@ importers:
       vitest:
         specifier: ^1.6.1
         version: 1.6.1(@types/node@24.13.3)(jsdom@23.2.0)(lightningcss@1.33.0)(terser@5.49.0)
+      workbox-window:
+        specifier: ^7.4.1
+        version: 7.4.1
 
 packages:
 
